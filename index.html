@@ -1,1 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LANとネットワーク機器のしくみ｜情報I</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+<header class="rack">
+  <div class="rack__inner">
+    <div class="rack__badge">
+      <span class="rack__model">情報I / 情報通信ネットワーク</span>
+      <h1>LANとネットワーク機器</h1>
+      <p class="rack__lead">データは小さく分けて、宛名を付けて運ばれる。その様子を動かして確かめよう。</p>
+    </div>
+    <div class="ports" aria-hidden="true">
+      <span class="port"></span><span class="port"></span><span class="port"></span><span class="port"></span>
+      <span class="port"></span><span class="port"></span><span class="port"></span><span class="port"></span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="学習の順序">
+  <button class="tab is-active" data-tab="map"    type="button">1　つながり方</button>
+  <button class="tab"           data-tab="packet" type="button">2　データを分ける</button>
+  <button class="tab"           data-tab="device" type="button">3　機器の動き</button>
+  <button class="tab"           data-tab="quiz"   type="button">4　確認テスト</button>
+</nav>
+
+<main>
+
+<!-- ============ 1 つながり方 ============ -->
+<section class="panel is-active" id="tab-map">
+  <div class="panel__head">
+    <h2>学校や家のネットワークはこうつながっている</h2>
+    <p>機器をクリック（タップ）すると、その役割が下に出ます。</p>
+  </div>
+
+  <div class="stage">
+    <svg id="mapSvg" viewBox="0 0 900 470" role="img" aria-label="LANの構成図">
+      <g id="mapLinks"></g>
+      <g id="mapNodes"></g>
+      <g id="mapFly"></g>
+    </svg>
+  </div>
+
+  <div class="stage__bar">
+    <button class="btn btn--go" id="mapSend" type="button">パソコンAからインターネットへ送る</button>
+    <span class="hint" id="mapHint">ケーブルの上を動く色の粒がデータ（パケット）です。</span>
+  </div>
+
+  <div class="detail" id="mapDetail">
+    <h3 id="mapDetailName">機器を選んでください</h3>
+    <p id="mapDetailRole"></p>
+    <dl id="mapDetailSpec"></dl>
+  </div>
+
+  <div class="note">
+    <h3>LAN と WAN</h3>
+    <p><b>LAN</b>（Local Area Network）は、教室・学校・家庭など<b>限られた範囲</b>をつないだネットワークです。LANどうしを広い範囲でつないだものが<b>WAN</b>（Wide Area Network）で、世界中のWANがつながったものがインターネットです。</p>
+  </div>
+</section>
+
+<!-- ============ 2 データを分ける ============ -->
+<section class="panel" id="tab-packet">
+  <div class="panel__head">
+    <h2>大きなデータは、小さく分けて送る</h2>
+    <p>まとめて送らず<b>パケット</b>に分けると、回線を多くの人で分け合えます。ただし分けたままでは元に戻せません。そこで<b>ヘッダ</b>を付けます。</p>
+  </div>
+
+  <div class="controls">
+    <label class="field">
+      <span>送りたいデータ</span>
+      <input id="srcText" type="text" maxlength="40" value="ネットワークのしくみを学ぶ">
+    </label>
+    <label class="field field--slim">
+      <span>1パケットの文字数：<b id="sizeView">4</b></span>
+      <input id="sizeRange" type="range" min="2" max="8" value="4">
+    </label>
+    <label class="switch">
+      <input id="headerOn" type="checkbox" checked>
+      <span>ヘッダを付ける</span>
+    </label>
+    <button class="btn btn--go" id="sendPackets" type="button">分けて送る</button>
+  </div>
+
+  <div class="split">
+    <div class="split__col">
+      <h3 class="colhead colhead--a">送信側：分割してヘッダを付ける</h3>
+      <div class="packets" id="madeList"></div>
+    </div>
+    <div class="split__col">
+      <h3 class="colhead colhead--b">受信側：届いた順（順番はバラバラ）</h3>
+      <div class="packets" id="gotList"></div>
+      <button class="btn" id="rebuild" type="button" disabled>元のデータに戻す</button>
+      <div class="result" id="rebuildResult"></div>
+    </div>
+  </div>
+
+  <div class="note">
+    <h3>ヘッダに書かれていること</h3>
+    <p>ヘッダは荷物の<b>送り状</b>にあたります。<b>宛先IPアドレス</b>と<b>送信元IPアドレス</b>があるので届け先と返信先がわかり、<b>通し番号</b>があるので届く順番が入れかわっても正しく組み立て直せます。ヘッダのチェックを外して送ると、何が起きるか試してみましょう。</p>
+  </div>
+</section>
+
+<!-- ============ 3 機器の動き ============ -->
+<section class="panel" id="tab-device">
+  <div class="panel__head">
+    <h2>ハブ・スイッチ・ルータは、どこが違う？</h2>
+    <p>同じ「つなぐ機器」でも、宛先の見方と配り方が違います。切りかえて比べてみましょう。</p>
+  </div>
+
+  <div class="seg" role="group" aria-label="機器の切りかえ">
+    <button class="seg__btn is-on" data-dev="hub"    type="button">リピータハブ</button>
+    <button class="seg__btn"       data-dev="switch" type="button">スイッチングハブ</button>
+    <button class="seg__btn"       data-dev="router" type="button">ルータ</button>
+  </div>
+
+  <div class="stage">
+    <svg id="devSvg" viewBox="0 0 760 430" role="img" aria-label="機器の動作図">
+      <g id="devLinks"></g>
+      <g id="devNodes"></g>
+      <g id="devFly"></g>
+    </svg>
+  </div>
+
+  <div class="stage__bar">
+    <button class="btn btn--go" id="devSend" type="button">パソコンAから送信</button>
+    <button class="btn" id="devReset" type="button">はじめから</button>
+    <span class="hint" id="devHint"></span>
+  </div>
+
+  <div class="split">
+    <div class="split__col">
+      <h3 class="colhead colhead--a">動作の記録</h3>
+      <ol class="log" id="devLog"></ol>
+    </div>
+    <div class="split__col">
+      <h3 class="colhead colhead--b" id="tableTitle">MACアドレステーブル</h3>
+      <table class="mactable">
+        <thead><tr><th>ポート</th><th>MACアドレス</th></tr></thead>
+        <tbody id="macBody"></tbody>
+      </table>
+      <p class="hint" id="tableHint"></p>
+    </div>
+  </div>
+
+  <div class="note" id="devNote"></div>
+</section>
+
+<!-- ============ 4 確認テスト ============ -->
+<section class="panel" id="tab-quiz">
+  <div class="panel__head">
+    <h2>確認テスト</h2>
+    <p>全8問。選ぶとすぐに正誤と解説が出ます。</p>
+  </div>
+  <div id="quizList" class="quiz"></div>
+  <div class="score" id="score">正解 0 / 8</div>
+  <button class="btn" id="quizReset" type="button">もう一度</button>
+</section>
+
+</main>
+
+<footer class="foot">
+  <p>情報I「情報通信ネットワークとデータの活用」学習用教材</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
